@@ -10,7 +10,10 @@ app.config.from_object(os.environ['APP_SETTINGS'])
 app.secret_key = 'some_secret'
 #create an instance of SQLAlchemy
 db = SQLAlchemy(app)
-from app import models
+from models.user import User
+from models.category import Category
+from models.challenge import Challenge
+from models.score import Score
 
 from app.users.controllers import users as users
 app.register_blueprint(users)

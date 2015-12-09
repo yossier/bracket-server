@@ -1,7 +1,7 @@
 from app import db
 from datetime import datetime
 
-class Challenge:
+class Challenge(db.Model):
     id = db.Column(db.Integer, primary_key=True)
     points = db.Column(db.Integer)
     title = db.Column(db.String(80))

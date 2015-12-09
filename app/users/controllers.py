@@ -1,4 +1,7 @@
-from flask import Blueprint
+from flask import Blueprint, json, request
+from flask.ext.sqlalchemy import sqlalchemy
+from app import db
+from app.models.user import User
 
 users = Blueprint('users', __name__)
 
@@ -6,31 +9,174 @@ users = Blueprint('users', __name__)
 def users_create():
     req_json = request.get_json()
 
-    email = req_json().get('email')
+    if req_json is None:
+        response = json.jsonify(error='Please post your request in json format', status=400)
+        response.status_code=400
+        return response
+    
+    email = req_json.get('email')
     passHash = req_json.get('passHash')
-    first = req_json.get('first')
-    last = req_json.get('last')
-    return
+    first = req_json.get('first_name')
+    last = req_json.get('last_name')
 
-@users.route('/users/<userid>', methods=['GET', 'PATCH', 'DELETE'])
-def get_user_by_id(userid):
-    return 'You are asking for user ' + userid
+    if not email and not passHash:
+        response = json.jsonify(error='Please Enter a valid email and password', status=400)
+        response.status_code = 400
+        return response
+    if not email:
+        response = json.jsonify(error='Please Enter a valid email address', status=400)
+        response.status_code = 400
+        return response
+    if not passHash:
+        response = json.jsonify(error='Please Enter a valid password', status=400)
+        response.status_code = 400
+        return response
+    
+    new_user = User(email, passHash, first, last)
 
+    try:
+        db.session.add(new_user)
+        db.session.commit()
+    except Exception as e:
+        print ("e")
+        db.session.rollback()
+        db.session.flush()
+        response = json.jsonify(error="Email address is already registered", status=400)
+        response.status_code=400
+        return response
+    
+    response = json.jsonify(user_id=new_user.id, status=201)
+    response.status_code = 201
+    return response
 
+@users.route('/users/<int:userid>', methods=['GET', 'DELETE'])
+def get_delete_user_by_id(userid):
+    
+    target = User.query.get(userid)
 
-@users.route('/users/<userid>/password', methods=['PUT'])
+    response = ''
+    
+    if target == None:
+        response = json.jsonify(error='User %i does not exist' % (userid,), status=404 )
+        response.status_code=404
+        return response
+
+    if request.method == 'GET':
+        response = json.jsonify(user_id=target.id, email=target.email, first_name=target.first_name, last_name=target.last_name, total_points=target.total_points, status=200)
+        response.status_code=200
+
+    if request.method == "DELETE":
+        # delete target user
+        response = json.jsonify(error="Unable to delete users at this time", status=400)
+        response.status_code=400
+
+    return response
+    
+@users.route('/users/<int:userid>/name', methods=['PUT'])
+def patch_user_name(userid):
+    user = User.query.get(userid)
+
+    req_json = requests.get_json()
+    first_name = req_json.get('first_name')
+    last_name = req_json.get('last_name')
+    passHash = req_json.get('passHash')
+
+    if not passHash or not user or passHash != user.passHash:
+        response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
+        response.status_code = 401
+        return response
+
+    user.first_name = first_name
+    user.last_name = last_name
+    db.session.commit()
+
+    response = json.jsonify(user_id=user.id, first_name= user.first_name, last_name=user.last_name, status=200)
+    response.status_code = 200
+    return response
+    
+
+@users.route('/users/<int:userid>/email', methods=['PUT'])
+def replace_user_email(userid):
+    user = User.query.get(userid)
+
+    req_json = requests.get_json()
+    email = req_json.get('email')
+    passHash = req_json.gety('passHash')
+    
+    if not passHash or not user or passHash != user.passHash:
+        response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
+        response.status_code = 401
+        return response
+
+    if not email:
+        response = json.jsonify(error="Please provide a valid email address!", status=400)
+        response.status_code=400
+        return response
+    
+    user.email = email
+    db.session.commit()
+
+    response = json.jsonify(user_id=user.id, first_name= user.first_name, last_name=user.last_name, status=200)
+    response.status_code = 200
+    return response
+
+@users.route('/users/<int:userid>/password', methods=['PUT'])
 def replace_user_password(userid):
-    return 'You are trying to replace ' + userid + '\'s password'
+    user = User.query.get(userid)
+
+    req_json = requests.get_json()
+    passHash = req_json.get('passHash')
+    newPassHash = req_json.get('newPassHash')
+    
+    if not passHash or not user or passHash != user.passHash:
+        response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
+        response.status_code = 401
+        return response
+
+    if not newPassHash:
+        response = json.jsonify(error="Please enter a valid password!", status=400)
+        response.status_code = 400
+        return response
+
+    user.pashHash = newHashPass
+    db.session.commit()
+    
+    response = json.jsonify(user_id=user.id, status=200)
+    response.status_code = 200
+    return response
 
 
-@users.route('/users/<userid>/points', methods=['GET', 'PUT'])
+@users.route('/users/<int:userid>/points', methods=['GET'])
 def access_user_points(userid):
-    return
+    user = User.query.get(userid)
+    if not user:
+        response = json.jsonify(error="User %i does not exist" % (userid,), status=400)
+        response.status_code=400
+        return response
 
-@users.route('/users/<userid>/completed-challenges', methods=['GET'])
+    response = json.jsonify(user_id=user.id, points=user.total_points, status=200)
+    response.status_code=200
+    return response
+
+@users.route('/users/<int:userid>/completed-challenges', methods=['GET'])
 def get_user_completed_challenges(userid):
-    return
+    user = User.query.get(userid)
 
-@users.route('/users/<userid>/completed-challenges/<challengeid>', methods=['POST', 'PUT'])
+    if not user:
+        response = json.jsonify(error="User %i does not exist" % (userid,), status=400)
+        response.status_code=400
+        return response
+    
+    scores = user.scores.all()
+    response = json.jsonify(user_id=user.id, results=scores, status=200 )
+    response.status_code=200
+    return response
+
+@users.route('/users/<int:userid>/completed-challenges/<int:challengeid>', methods=['POST', 'PUT'])
 def record_user_challenge_score(userid, challengeid):
-    return
+    user = User.query.get(userid)
+
+    if not user:
+        response = json.jsonify(error="User %i does not exist" % (userid,), status=400)
+        response.status_code=400
+        return response

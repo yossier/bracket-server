@@ -13,9 +13,9 @@ class User(db.Model):
 
     def __init__(self, email, passHash, first='', last=''):
         self.email = email
-        self.passHash = passHash
-        self.firstName = first
-        self.lastName = last
+        self.pass_hash = passHash
+        self.first_name = first
+        self.last_name = last
         self.join_date = datetime.utcnow()
 
     def __repr__(self):
