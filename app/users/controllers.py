@@ -75,7 +75,7 @@ def get_delete_user_by_id(userid):
     return response
     
 @users.route('/users/<int:userid>/name', methods=['PUT'])
-def patch_user_name(userid):
+def update_user_name(userid):
     user = User.query.get(userid)
 
     req_json = requests.get_json()

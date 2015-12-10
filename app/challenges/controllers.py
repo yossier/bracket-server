@@ -29,6 +29,6 @@ def get_challenge_list_of_challenge_type(challengeType):
 def get_challenge(challengeid):
     challenge = Challenge.get(challengeid)
 
-    response = json.jsonify(id=challenge.id, points=challenge.points, title=challenge.title, category=category.name status=200)
+    response = json.jsonify(id=challenge.id, points=challenge.points, title=challenge.title, category=category.name, status=200)
     response.status_code = 200
     return response
