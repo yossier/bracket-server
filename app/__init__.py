@@ -16,4 +16,6 @@ from models.challenge import Challenge
 from models.score import Score
 
 from app.users.controllers import users as users
+from app.challenges.controllers import challenges as challenges
 app.register_blueprint(users)
+app.register_blueprint(challenges)

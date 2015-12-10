@@ -2,6 +2,8 @@ from flask import Blueprint, json, request
 from flask.ext.sqlalchemy import sqlalchemy
 from app import db
 from app.models.user import User
+from app.models.challenge import Challenge
+from app.models.score import Score
 
 users = Blueprint('users', __name__)
 
@@ -168,15 +170,54 @@ def get_user_completed_challenges(userid):
         return response
     
     scores = user.scores.all()
-    response = json.jsonify(user_id=user.id, results=scores, status=200 )
+    response = json.jsonify(user_id=user.id, user_scores=scores, attempted_challenges=len(scores), status=200 )
     response.status_code=200
     return response
 
 @users.route('/users/<int:userid>/completed-challenges/<int:challengeid>', methods=['POST', 'PUT'])
 def record_user_challenge_score(userid, challengeid):
     user = User.query.get(userid)
+    req_json = request.get_json()
+    points =  req_json.get('points')
 
     if not user:
         response = json.jsonify(error="User %i does not exist" % (userid,), status=400)
         response.status_code=400
         return response
+    
+    challenge = Challenge.query.get(challengeid)
+    if not challenge:
+        response = json.jsonify(error="Challenge %i does not exist" % (challengeid,), status=400)
+        response.status_code=400
+        return response
+
+    if not points:
+        response = json.jsonify(error="Please provide a points value to update score by", status=400)
+        response.status_code=400
+        return response
+    
+    current_score = user.scores.filter_by(challengeid=challengeid).first()
+
+    prev_score = 0
+    
+    if not current_score:
+        current_score = Score(points, user)
+        
+    elif current_score.points >= points:
+        response = json.jsonify(msg="Here at <bracket> we use mastery grading", points=current_socre.points, status=200)
+        response.status_code = status=200
+        return response
+
+    else:
+        prev_score = current_score.points
+        current_score.points = points
+        
+    if current_score.points == challenge.points:
+        current_score.completed = True
+
+    user.total_points += current_score.points - prev_score
+        
+    db.session.commit()
+    response = json.jsonify(msg="Successfully updated score", points=current_score.points, status=200)
+    response.status_code = status=200
+    return response
