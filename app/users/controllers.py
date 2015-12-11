@@ -96,12 +96,12 @@ def user_authenticate():
     user = User.query.filter_by(email=email).first()
 
     if not user:
-        response = json.jsonify(error="Incorrect Email and Password combonation", status=400)
+        response = json.jsonify(error="Incorrect Email and Password combonation", status=404)
         response.status_code = 404
         return response
     elif user.pass_hash != passHash:
-        response = json.jsonify(error="Please enter a valid password", status=400)
-        response.status_code = 400
+        response = json.jsonify(error="Incorrect Email and Password combonation", status=404)
+        response.status_code = 404
         return response
 
     response = json.jsonify(user_id=user.id, status=200)
