@@ -73,7 +73,43 @@ def get_delete_user_by_id(userid):
         response.status_code=400
 
     return response
+
+@users.route('/users/authenticate', methods=['POST'])
+def user_authenticate():
+    req_json = request.get_json()
+    email = req_json.get('email')
+    passHash = req_json.get('passHash')
+
+    if not email or not passHash:
+        response = json.jsonify(error="Please enter a valid email and password", status=400)
+        response.status_code = 400
+        return response
+    elif not email:
+        response = json.jsonify(error="Please enter a valid email", status=400)
+        response.status_code = 400
+        return response
+    elif not passHash:
+        response = json.jsonify(error="Please enter a valid password", status=400)
+        response.status_code = 400
+        return response
+
+    user = User.query.filter_by(email=email).first()
+
+    if not user:
+        response = json.jsonify(error="Incorrect Email and Password combonation", status=400)
+        response.status_code = 404
+        return response
+    elif user.pass_hash != passHash:
+        response = json.jsonify(error="Please enter a valid password", status=400)
+        response.status_code = 400
+        return response
+
+    response = json.jsonify(user_id=user.id, status=200)
+    response.status_code = 200
+    return response
+        
     
+
 @users.route('/users/<int:userid>/name', methods=['PUT'])
 def update_user_name(userid):
     user = User.query.get(userid)
@@ -83,7 +119,7 @@ def update_user_name(userid):
     last_name = req_json.get('last_name')
     passHash = req_json.get('passHash')
 
-    if not passHash or not user or passHash != user.passHash:
+    if not passHash or not user or passHash != user.pass_hash:
         response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
         response.status_code = 401
         return response
@@ -105,7 +141,7 @@ def replace_user_email(userid):
     email = req_json.get('email')
     passHash = req_json.gety('passHash')
     
-    if not passHash or not user or passHash != user.passHash:
+    if not passHash or not user or passHash != user.pass_hash:
         response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
         response.status_code = 401
         return response
@@ -130,7 +166,7 @@ def replace_user_password(userid):
     passHash = req_json.get('passHash')
     newPassHash = req_json.get('newPassHash')
     
-    if not passHash or not user or passHash != user.passHash:
+    if not passHash or not user or passHash != user.pass_hash:
         response = json.jsonify(error="Authentication error: Incorrect Userid Password combo!", status=401)
         response.status_code = 401
         return response
@@ -140,7 +176,7 @@ def replace_user_password(userid):
         response.status_code = 400
         return response
 
-    user.pashHash = newHashPass
+    user.pash_hash = newHashPass
     db.session.commit()
     
     response = json.jsonify(user_id=user.id, status=200)
