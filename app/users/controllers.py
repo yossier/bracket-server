@@ -80,7 +80,7 @@ def user_authenticate():
     email = req_json.get('email')
     passHash = req_json.get('passHash')
 
-    if not email or not passHash:
+    if not email and not passHash:
         response = json.jsonify(error="Please enter a valid email and password", status=400)
         response.status_code = 400
         return response
