@@ -274,9 +274,11 @@ def record_user_challenge_score(userid, challengeid):
     if current_score.points == challenge.points:
         current_score.completed = True
 
-    user.total_points += current_score.points - prev_score
+    user.total_points = 0
+    for score in user.scores.all():
+        user.total_points += score.points
         
     db.session.commit()
-    response = json.jsonify(msg="Successfully updated score", points=current_score.points, status=200)
+    response = json.jsonify(msg="Successfully updated score", points=current_score.points, user_total_score=user.total_points, status=200)
     response.status_code = status=200
     return response
