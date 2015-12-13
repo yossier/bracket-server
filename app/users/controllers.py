@@ -208,12 +208,15 @@ def get_user_completed_challenges(userid):
     scores = user.scores.all()
 
     challengeList = []
+    num_completed_challenges = 0
     for score in scores:
         challenge = score.challenge
+        if score.completed:
+            num_completed_challenges += 1
         challengeList.append({"user_id":score.user_id, "user_score":score.points, "challenge_completed":score.completed, "challenge_id":challenge.id, "challenge_title":challenge.title, "challenge_category":challenge.category.name, "challenge_points":challenge.points})
     
     
-    response = json.jsonify(user_id=user.id, challenges=challengeList, attempted_challenges=len(scores), status=200 )
+    response = json.jsonify(user_id=user.id, challenges=challengeList, attempted_challenges=len(scores), completed_challenges=num_completed_challenges, status=200 )
     response.status_code=200
     return response
 
