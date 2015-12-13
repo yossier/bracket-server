@@ -15,7 +15,7 @@ class Score(db.Model):
 
     def __init__(self, points, user, challenge):
         self.points = points
-        self.completed = false
+        self.completed = False
         self.user = user
         self.challenge = challenge
 

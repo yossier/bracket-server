@@ -206,7 +206,14 @@ def get_user_completed_challenges(userid):
         return response
     
     scores = user.scores.all()
-    response = json.jsonify(user_id=user.id, user_scores=scores, attempted_challenges=len(scores), status=200 )
+
+    challengeList = []
+    for score in scores:
+        challenge = score.challenge
+        challengeList.append({"user_id":score.user_id, "user_score":score.points, "challenge_completed":score.completed, "challenge_id":challenge.id, "challenge_title":challenge.title, "challenge_category":challenge.category.name, "challenge_points":challenge.points})
+    
+    
+    response = json.jsonify(user_id=user.id, challenges=challengeList, attempted_challenges=len(scores), status=200 )
     response.status_code=200
     return response
 
@@ -214,7 +221,7 @@ def get_user_completed_challenges(userid):
 def record_user_challenge_score(userid, challengeid):
     user = User.query.get(userid)
     req_json = request.get_json()
-    points =  req_json.get('points')
+    points =  int(req_json.get('points'))
 
     if not user:
         response = json.jsonify(error="User %i does not exist" % (userid,), status=400)
@@ -227,12 +234,17 @@ def record_user_challenge_score(userid, challengeid):
         response.status_code=400
         return response
 
-    if not points:
+    if not points and points != 0:
         response = json.jsonify(error="Please provide a points value to update score by", status=400)
         response.status_code=400
         return response
+
+    if points > challenge.points:
+        response = json.jsonify(error="Challenge max score is %i" % (challenge.points), status=400)
+        response.status_code = 400
+        return response
     
-    current_score = user.scores.filter_by(challengeid=challengeid).first()
+    current_score = user.scores.filter_by(challenge_id=challengeid).first()
 
     prev_score = 0
     
@@ -240,7 +252,7 @@ def record_user_challenge_score(userid, challengeid):
         current_score = Score(points, user)
         
     elif current_score.points >= points:
-        response = json.jsonify(msg="Here at <bracket> we use mastery grading", points=current_socre.points, status=200)
+        response = json.jsonify(msg="Here at <bracket> we use mastery grading", points=current_score.points, status=200)
         response.status_code = status=200
         return response
 
