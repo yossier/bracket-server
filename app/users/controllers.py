@@ -54,17 +54,24 @@ def users_create():
 @users.route('/users/<int:userid>', methods=['GET', 'DELETE'])
 def get_delete_user_by_id(userid):
     
-    target = User.query.get(userid)
+    user = User.query.get(userid)
 
     response = ''
     
-    if target == None:
+    if not user:
         response = json.jsonify(error='User %i does not exist' % (userid,), status=404 )
         response.status_code=404
         return response
 
     if request.method == 'GET':
-        response = json.jsonify(user_id=target.id, email=target.email, first_name=target.first_name, last_name=target.last_name, total_points=target.total_points, status=200)
+
+        scores = user.scores.all()
+        completed_challenges = 0
+        for score in scores:
+            if score.completed:
+                completed_challenges += 1
+        
+        response = json.jsonify(user_id=user.id, email=user.email, first_name=user.first_name, last_name=user.last_name, attempted_challenges=len(scores), completed_challenges=completed_challenges ,total_points=user.total_points, status=200)
         response.status_code=200
 
     if request.method == "DELETE":
