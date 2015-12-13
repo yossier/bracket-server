@@ -249,7 +249,8 @@ def record_user_challenge_score(userid, challengeid):
     prev_score = 0
     
     if not current_score:
-        current_score = Score(points, user)
+        current_score = Score(points, user, challenge)
+        
         
     elif current_score.points >= points:
         response = json.jsonify(msg="Here at <bracket> we use mastery grading", points=current_score.points, status=200)
