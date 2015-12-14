@@ -62,4 +62,25 @@ db.session.add(challenge12)
 challenge13 = Challenge(8, "dataStructures2", Category.query.get(2))
 db.session.add(challenge13)
 
+challenge14 = Challenge(1, "bigO4", Category.query.get(3))
+db.session.add(challenge14)
+
+challenge15 = Challenge(9, "dataStructures3", Category.query.get(2))
+db.session.add(challenge15)
+
+challenge16 = Challenge(5, "dataStructures4", Category.query.get(2))
+db.session.add(challenge16)
+
+challenge17 = Challenge(6, "algorithms1", Category.query.get(5))
+db.session.add(challenge17)
+
+challenge18 = Challenge(6, "algorithms2", Category.query.get(5))
+db.session.add(challenge18)
+
+challenge19 = Challenge(7, "algorithms3", Category.query.get(5))
+db.session.add(challenge19)
+
+challenge20 = Challenge(5, "algorithms4", Category.query.get(5))
+db.session.add(challenge20)
+
 db.session.commit()
