@@ -51,6 +51,26 @@ def users_create():
     response.status_code = 201
     return response
 
+@users.route('/users/top-ten', methods=['GET'])
+def get_top_ten_users():
+    users = User.query.order_by(sqlalchemy.desc(User.total_points))
+
+    userList = []
+    i = 0
+    for user in users:
+        if i > 9:
+            break
+        userList.append({
+            "email" : user.email,
+            "first_name": user.first_name,
+            "last_name": user.last_name,
+            "points": user.total_points
+        })
+        i += 1
+    response = json.jsonify(users=userList, status=200)
+    response.status_code = 200
+    return response
+
 @users.route('/users/<int:userid>', methods=['GET', 'DELETE'])
 def get_delete_user_by_id(userid):
     
