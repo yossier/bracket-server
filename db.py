@@ -12,8 +12,8 @@ db.session.add(recursion)
 dataStructures = Category("dataStructures")
 db.session.add(dataStructures)
 
-bigO =  Category("bigO")
-db.session.add(bigO)
+complexity =  Category("complexity")
+db.session.add(complexity)
 
 loops = Category("loops")
 db.session.add(loops)
@@ -23,13 +23,13 @@ db.session.add(algorithms)
 
 db.session.commit()
 
-challenge1 = Challenge(1, "bigO1", Category.query.get(3))
+challenge1 = Challenge(1, "complexity1", Category.query.get(3))
 db.session.add(challenge1)
 
-challenge2 = Challenge(1, "bigO2", Category.query.get(3))
+challenge2 = Challenge(1, "complexity2", Category.query.get(3))
 db.session.add(challenge2)
 
-challenge3 = Challenge(1, "bigO3", Category.query.get(3))
+challenge3 = Challenge(1, "complexity3", Category.query.get(3))
 db.session.add(challenge1)
 
 challenge4 = Challenge(6, "loops1", Category.query.get(4))
@@ -62,7 +62,7 @@ db.session.add(challenge12)
 challenge13 = Challenge(8, "dataStructures2", Category.query.get(2))
 db.session.add(challenge13)
 
-challenge14 = Challenge(1, "bigO4", Category.query.get(3))
+challenge14 = Challenge(1, "complexity4", Category.query.get(3))
 db.session.add(challenge14)
 
 challenge15 = Challenge(9, "dataStructures3", Category.query.get(2))
